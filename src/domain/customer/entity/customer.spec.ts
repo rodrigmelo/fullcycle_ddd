@@ -1,3 +1,4 @@
+import EventDispatcher from "../../@shared/event/event-dispatcher";
 import Address from "../value-object/address";
 import Customer from "./customer";
 
@@ -59,5 +60,26 @@ describe("Customer unit tests", () => {
 
     customer.addRewardPoints(10);
     expect(customer.rewardPoints).toBe(20);
+  });
+
+  it("Should throw two notification events when customer is created", async () => {
+    const eventDispatcher = new EventDispatcher();
+    const spyCustomerNotify = jest.spyOn(eventDispatcher, "notify");
+    const customer = new Customer("1", "costumerName", eventDispatcher);
+
+    expect(spyCustomerNotify).toBeCalledTimes(2);
+  });
+
+  it("Should notification event when address is changed", async () => {
+    const eventDispatcher = new EventDispatcher();
+    const customer = new Customer("1", "my name", eventDispatcher);
+    const address = new Address("street", 2, "zipcode", "city");
+    customer.Address = address;
+    const newAddress = new Address("new street", 3, "new zipcode", "new city");
+    const spyCustomerNotify = jest.spyOn(eventDispatcher, "notify");
+    customer.changeAddress(newAddress);
+
+    expect(customer.Address).toBe(newAddress);
+    expect(spyCustomerNotify).toBeCalledTimes(1);
   });
 });
